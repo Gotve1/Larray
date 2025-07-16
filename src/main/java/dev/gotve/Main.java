@@ -1,12 +1,9 @@
 package dev.gotve;
 
-import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
-import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.TerminalFactory;
 
 import java.io.IOException;
 import java.util.Random;
@@ -14,13 +11,17 @@ import java.util.Random;
 public class Main {
 
     static Terminal terminal;
-    static Random random = new Random();
-    static int findX;
-    static int findY;
+
     static int WIDTH = 10;
     static int HEIGHT = 10;
     static String[][] map = new String[WIDTH][HEIGHT];
     static boolean alreadyUsed;
+
+    static Random random1 = new Random();
+    static int posX1 = random1.nextInt(map.length);
+    static int posY1 = random1.nextInt(map[0].length);
+
+    static Random random = new Random();
     static int posX = random.nextInt(map.length);
     static int posY = random.nextInt(map[0].length);
 
@@ -32,7 +33,6 @@ public class Main {
             try {
                 terminal = new DefaultTerminalFactory().createTerminal();
                 keyboardHandler();
-                find(map);
                 Thread.sleep(1);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -49,13 +49,14 @@ public class Main {
                     map[i][x] = "\033[32m░░\033[0m";
                 }
             }
+            map[posY1][posX1] = "\u001B[34m██\033[0m";
             map[posY][posX] = "\033[33m██\033[0m";
         }
     }
 
     public static void keyboardHandler() {
         try {
-            KeyStroke keyStroke = terminal.pollInput();  // ❌ Don't call pollInput() twice
+            KeyStroke keyStroke = terminal.pollInput();
             if (keyStroke != null) {
                 if (keyStroke.getKeyType() == KeyType.Character) {
                     char keyChar = Character.toLowerCase(keyStroke.getCharacter());
@@ -74,7 +75,7 @@ public class Main {
                             moveRight();
                             break;
                     }
-                    fetchMap(map); // Draw only if moved
+                    fetchMap(map);
                 }
 
                 if (keyStroke.getKeyType() == KeyType.Escape) {
@@ -90,38 +91,50 @@ public class Main {
 
 
     public static void moveRight() {
+        if (map[posY][posX + 1].equals("\u001B[34m██\033[0m")) {
+            return;
+        }
         map[posY][posX] = "\033[32m░░\033[0m";
-        posX++;
         if (posX >= WIDTH) {
             posX = 0;
         }
+        posX++;
         map[posY][posX] = "\033[33m██\033[0m";
     }
 
     public static void moveLeft() {
+        if (map[posY][posX - 1].equals("\u001B[34m██\033[0m")) {
+            return;
+        }
         map[posY][posX] = "\033[32m░░\033[0m";
-        posX--;
         if (posX < 0) {
             posX = WIDTH - 1;
         }
+        posX--;
         map[posY][posX] = "\033[33m██\033[0m";
     }
 
     public static void moveUp() {
+        if (map[posY - 1][posX].equals("\u001B[34m██\033[0m")) {
+            return;
+        }
         map[posY][posX] = "\033[32m░░\033[0m";
-        posY--;
         if (posY < 0) {
             posY = HEIGHT - 1;
         }
+        posY--;
         map[posY][posX] = "\033[33m██\033[0m";
     }
 
     public static void moveDown() {
+        if (map[posY + 1][posX].equals("\u001B[34m██\033[0m")) {
+            return;
+        }
         map[posY][posX] = "\033[32m░░\033[0m";
-        posY++;
         if (posY >= HEIGHT) {
             posY = 0;
         }
+        posY++;
         map[posY][posX] = "\033[33m██\033[0m";
     }
 
@@ -132,17 +145,6 @@ public class Main {
                 System.out.print(map[i][x]);
             }
             System.out.println();
-        }
-    }
-
-    public static void find(String[][] map) {
-
-        for (findX = 0; findX < map.length; findX++) {
-            for (findY = 0; findY < map[findX].length; findY++) {
-                if (map[findX][findY].equals("\033[31m██\033[0m")) {
-                    System.out.println(findX + ":" + findY);
-                }
-            }
         }
     }
 }
