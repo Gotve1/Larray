@@ -12,18 +12,22 @@ public class Main {
 
     static Terminal terminal;
 
-    static int WIDTH = 10;
-    static int HEIGHT = 10;
+    static int WIDTH = 30;
+    static int HEIGHT = 30;
     static String[][] map = new String[WIDTH][HEIGHT];
     static boolean alreadyUsed;
+
+    static Random random = new Random();
+    static int posX = random.nextInt(map.length);
+    static int posY = random.nextInt(map[0].length);
 
     static Random random1 = new Random();
     static int posX1 = random1.nextInt(map.length);
     static int posY1 = random1.nextInt(map[0].length);
 
-    static Random random = new Random();
-    static int posX = random.nextInt(map.length);
-    static int posY = random.nextInt(map[0].length);
+    static String cube = "\u001B[32m██\033[0m";
+    static String player = "\u001B[33m██\033[0m";
+    static String stone = "\u001B[34m██\033[0m";
 
     public static void main(String[] args) {
 
@@ -33,7 +37,7 @@ public class Main {
             try {
                 terminal = new DefaultTerminalFactory().createTerminal();
                 keyboardHandler();
-                Thread.sleep(1);
+                Thread.sleep(10);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -46,11 +50,19 @@ public class Main {
 
             for (int i = 0; i < map.length; i++) {
                 for (int x = 0; x < map[i].length; x++) {
-                    map[i][x] = "\033[32m░░\033[0m";
+                    map[i][x] = cube;
                 }
             }
-            map[posY1][posX1] = "\u001B[34m██\033[0m";
-            map[posY][posX] = "\033[33m██\033[0m";
+            for (int i = 0; i < 1; i++) {
+                Random random2 = new Random();
+                int posX2 = random2.nextInt(map.length);
+                int posY2 = random2.nextInt(map[0].length);
+                map[posY2][posX2 + 1] = stone;
+                map[posY2][posX2 + 2] = stone;
+                map[posY2 - 1][posX2 + 2] = stone;
+            }
+            map[posY1][posX1] = stone;
+            map[posY][posX] = player;
         }
     }
 
@@ -88,54 +100,52 @@ public class Main {
         }
     }
 
-
-
     public static void moveRight() {
-        if (map[posY][posX + 1].equals("\u001B[34m██\033[0m")) {
+        if (map[posY][posX + 1].equals(stone)) {
             return;
         }
-        map[posY][posX] = "\033[32m░░\033[0m";
+        map[posY][posX] = cube;
         if (posX >= WIDTH) {
             posX = 0;
         }
         posX++;
-        map[posY][posX] = "\033[33m██\033[0m";
+        map[posY][posX] = player;
     }
 
     public static void moveLeft() {
-        if (map[posY][posX - 1].equals("\u001B[34m██\033[0m")) {
+        if (map[posY][posX - 1].equals(stone)) {
             return;
         }
-        map[posY][posX] = "\033[32m░░\033[0m";
+        map[posY][posX] = cube;
         if (posX < 0) {
             posX = WIDTH - 1;
         }
         posX--;
-        map[posY][posX] = "\033[33m██\033[0m";
+        map[posY][posX] = player;
     }
 
     public static void moveUp() {
-        if (map[posY - 1][posX].equals("\u001B[34m██\033[0m")) {
+        if (map[posY - 1][posX].equals(stone)) {
             return;
         }
-        map[posY][posX] = "\033[32m░░\033[0m";
+        map[posY][posX] = cube;
         if (posY < 0) {
             posY = HEIGHT - 1;
         }
         posY--;
-        map[posY][posX] = "\033[33m██\033[0m";
+        map[posY][posX] = player;
     }
 
     public static void moveDown() {
-        if (map[posY + 1][posX].equals("\u001B[34m██\033[0m")) {
+        if (map[posY + 1][posX].equals(stone)) {
             return;
         }
-        map[posY][posX] = "\033[32m░░\033[0m";
+        map[posY][posX] = cube;
         if (posY >= HEIGHT) {
             posY = 0;
         }
         posY++;
-        map[posY][posX] = "\033[33m██\033[0m";
+        map[posY][posX] = player;
     }
 
     public static void fetchMap(String[][] map) {
