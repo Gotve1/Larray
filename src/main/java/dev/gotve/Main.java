@@ -6,15 +6,22 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class Main {
+
+    static Path path = Paths.get("/home/gotve/Documents/Java/RandomArray/src/main/resources/maps/");
 
     static Terminal terminal;
 
     static int WIDTH = 30;
     static int HEIGHT = 30;
-    static String[][] map = new String[WIDTH][HEIGHT];
+    static String[][] map = new String[HEIGHT][WIDTH];
     static boolean alreadyUsed;
 
     static Random random = new Random();
@@ -29,20 +36,29 @@ public class Main {
     static String player = "\u001B[33m██\033[0m";
     static String stone = "\u001B[34m██\033[0m";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        try {
+            terminal = new DefaultTerminalFactory().createTerminal();
 
-        while (true) {
-            generateMap(map);
-            fetchMap(map);
-            try {
-                terminal = new DefaultTerminalFactory().createTerminal();
-                keyboardHandler();
-                Thread.sleep(10);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (Files.list(path).findAny().isEmpty()) {
+                System.out.println("Looking for files in: " + path.toAbsolutePath());
+                generateMap(map);
+            } else {
+                loadMap();
             }
+
+            fetchMap(map);
+
+            while (true) {
+                keyboardHandler();
+                Thread.sleep(50);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
 
     public static void generateMap(String[][] map) {
         if (!alreadyUsed) {
@@ -63,6 +79,48 @@ public class Main {
             }
             map[posY1][posX1] = stone;
             map[posY][posX] = player;
+        }
+    }
+
+    public static void loadMap() throws IOException {
+        Path mapFile = Files.list(path).findFirst().get();
+
+        var lines = Files.readAllLines(mapFile);
+
+        boolean playerFound = false;
+
+        for (int i = 0; i < map.length; i++) {
+            Arrays.fill(map[i], cube);
+        }
+
+        for (int y = 0; y < HEIGHT && y < lines.toArray().length; y++) {
+            String line = lines.get(y);
+            for (int x = 0; x < WIDTH && x < line.length(); x++) {
+                char ch = line.charAt(x);
+                switch (ch) {
+                    case '.':
+                        map[y][x] = cube;
+                        break;
+                    case 'S':
+                        map[y][x] = stone;
+                        break;
+                    case 'P':
+                        map[y][x] = player;
+                        posX = x;
+                        posY = y;
+                        playerFound = true;
+                        break;
+                    default:
+                        map[y][x] = cube;
+                        break;
+                }
+            }
+        }
+        if (!playerFound) {
+            System.out.println("Warning: no player found on map.txt");
+            //generateMap(map);
+        } else {
+            alreadyUsed = true;
         }
     }
 
